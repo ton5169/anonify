@@ -8,3 +8,4 @@ API_PREFIX = "/api/v1"
 
 
 AUTH_PASSWORD = config("AUTH_PASSWORD", cast=str, default="ChangeMe123!")
+MAX_TEXT_LENGTH = config("MAX_TEXT_LENGTH", cast=int, default=1500)

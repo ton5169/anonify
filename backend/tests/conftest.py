@@ -19,6 +19,7 @@ def app() -> FastAPI:
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_env():
     os.environ["AUTH_PASSWORD"] = "test_password"
+    os.environ["MAX_TEXT_LENGTH"] = "1500"
 
 
 # Fixture to create an AsyncClient for testing
