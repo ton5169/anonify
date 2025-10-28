@@ -1,3 +1,3 @@
-from app.services.pii_removal import PiiRemovalService
+from app.services.pii_removal import PiiRemovalRegexService
 
-pii_removal_service = PiiRemovalService()
+pii_removal_regex_service = PiiRemovalRegexService()
