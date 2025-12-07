@@ -11,7 +11,7 @@ pytestmark = pytest.mark.asyncio
 def pii_out():
     return PiiOut(
         original_text="My name is John Doe and my email is fakemail@mail.com.",
-        clean_text="My name is [REDACTED] and my email is [REDACTED].",
+        clean_text="My name is John Doe and my email is [EMAIL_1].",
         clean_method="regex",
     )
 

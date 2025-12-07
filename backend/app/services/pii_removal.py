@@ -1,24 +1,90 @@
 import re
-from typing import Tuple
-
+from typing import Protocol, Tuple
 
 # TODO
-# https://gemini.google.com/share/b21a2b6514d6
-# make code improvements by using dependency injection and protocols
+# break into multiple files
+# add validation protocols
 
 
-class PiiRemovalRegexService:
+def return_placeholder_with_counter(text: str, pattern, placeholder: str) -> str:
+    """Utility to replace matches and number the placeholders."""
+
+    def replace_with_counter(match):
+        nonlocal count
+        count += 1
+        return f"[{placeholder}_{count}]"
+
+    temp_placeholder = f"__TEMP__{placeholder}__"
+    text, n = pattern.subn(temp_placeholder, text)
+
+    count = 0
+    if n > 0:
+        text = re.sub(re.escape(temp_placeholder), replace_with_counter, text)
+
+    return text
+
+
+class TextCleaner(Protocol):
+    """Protocol for text cleaning services."""
+
+    def clean(self, text: str) -> Tuple[str, str]:
+        """Cleans the input text and returns the cleaned text along with the method used."""
+        ...
+
+
+class PiiRule(Protocol):
+    """Protocol for PII removal rules."""
+
+    def apply(self, text: str) -> str:
+        """Applies the PII removal rule to the input text."""
+        ...
+
+    @property
+    def placeholder(self) -> str:
+        """Returns the placeholder used for this PII type."""
+        ...
+
+
+class RegexEmailRule:
     def __init__(self):
-        self.email_pattern = re.compile(
+        self._pattern = re.compile(
             r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
         )
 
-        self.ipv4_pattern = re.compile(
+    @property
+    def placeholder(self) -> str:
+        return "EMAIL"
+
+    def apply(self, text: str) -> str:
+        return return_placeholder_with_counter(
+            text,
+            self._pattern,
+            self.placeholder,
+        )
+
+
+class RegexIpv4Rule:
+    def __init__(self):
+        self._pattern = re.compile(
             r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
             r"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
         )
 
-        self.ipv6_pattern = re.compile(
+    @property
+    def placeholder(self) -> str:
+        return "IP_ADDRESS"
+
+    def apply(self, text: str) -> str:
+        return return_placeholder_with_counter(
+            text,
+            self._pattern,
+            self.placeholder,
+        )
+
+
+class RegexIpv6Rule:
+    def __init__(self):
+        self._pattern = re.compile(
             r"\b(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|"
             r"(?:[0-9a-fA-F]{1,4}:){1,7}:|"
             r"(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|"
@@ -31,64 +97,42 @@ class PiiRemovalRegexService:
             re.IGNORECASE,
         )
 
-        self.url_pattern = re.compile(r"\b(?:https?://|www\.)[^\s<>\"]+", re.IGNORECASE)
+    @property
+    def placeholder(self) -> str:
+        return "IP_ADDRESS"
 
-    @staticmethod
-    def clean_pii(text: str) -> str:
-        text = re.sub(r"\b[A-Z][a-z]+ [A-Z][a-z]+\b", "[REDACTED]", text)  # Names
-        text = re.sub(r"\b[\w\.-]+@[\w\.-]+\.\w+\b", "[REDACTED]", text)  # Emails
-        return text
+    def apply(self, text: str) -> str:
+        return return_placeholder_with_counter(
+            text,
+            self._pattern,
+            self.placeholder,
+        )
 
-    @staticmethod
-    def return_placeholder_with_counter(
-        text: str, placeholder: str, number: int
-    ) -> str:
-        count = 0
 
-        if not placeholder:
-            raise ValueError("Placeholder cannot be None or an empty string.")
+class RegexUrlRule:
+    def __init__(self):
+        self._pattern = re.compile(r"\b(?:https?://|www\.)[^\s<>\"]+", re.IGNORECASE)
 
-        if number < 0:
-            raise ValueError("Number of occurrences must be a positive integer (>= 1).")
+    @property
+    def placeholder(self) -> str:
+        return "URL"
 
-        def replace(match):
-            nonlocal count
+    def apply(self, text: str) -> str:
+        return return_placeholder_with_counter(
+            text,
+            self._pattern,
+            self.placeholder,
+        )
 
-            if count < number:
-                count += 1
-                return f"[{placeholder}_{count}]"
-            else:
-                return match.group(0)
 
-        modified_text = re.sub(re.escape(placeholder), replace, text)
-
-        return modified_text
-
-    def _clean_emails(self, text: str, placeholder: str) -> str:
-        text, n = self.email_pattern.subn(placeholder, text)
-        text = self.return_placeholder_with_counter(text, placeholder, n)
-        return text
-
-    def _clean_ipv4(self, text: str, placeholder: str) -> str:
-        text, n = self.ipv4_pattern.subn(placeholder, text)
-        text = self.return_placeholder_with_counter(text, placeholder, n)
-        return text
-
-    def _clean_ipv6(self, text: str, placeholder: str) -> str:
-        text, n = self.ipv6_pattern.subn(placeholder, text)
-        text = self.return_placeholder_with_counter(text, placeholder, n)
-        return text
-
-    def _clean_urls(self, text: str, placeholder: str) -> str:
-        text, n = self.url_pattern.subn(placeholder, text)
-        text = self.return_placeholder_with_counter(text, placeholder, n)
-
-        return text
+class RemovalServiceRegex:
+    def __init__(self, rules: list[PiiRule]):
+        self._rules = rules
+        self._method_id = "regex"
 
     def clean(self, text: str) -> Tuple[str, str]:
-        text = self._clean_urls(text, "URL")
-        text = self._clean_emails(text, "EMAIL")
-        text = self._clean_ipv4(text, "IP_ADDRESS")
-        text = self._clean_ipv6(text, "IP_ADDRESS")
+        cleaned_text = text
+        for rule in self._rules:
+            cleaned_text = rule.apply(cleaned_text)
 
-        return (text, "regex")
+        return cleaned_text, self._method_id

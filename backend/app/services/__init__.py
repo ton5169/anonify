@@ -1,3 +1,19 @@
-from app.services.pii_removal import PiiRemovalRegexService
+from app.services.pii_removal import (
+    PiiRule,
+    RegexEmailRule,
+    RegexIpv4Rule,
+    RegexIpv6Rule,
+    RegexUrlRule,
+    RemovalServiceRegex,
+    TextCleaner,
+    return_placeholder_with_counter,
+)
 
-pii_removal_regex_service = PiiRemovalRegexService()
+regex_rules: list[PiiRule] = [
+    RegexEmailRule(),
+    RegexIpv4Rule(),
+    RegexIpv6Rule(),
+    RegexUrlRule(),
+]
+
+removal_service_regex: TextCleaner = RemovalServiceRegex(rules=regex_rules)
