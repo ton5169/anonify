@@ -1,7 +1,8 @@
 import re
 
 import pytest
-from app.services import removal_service_regex, return_placeholder_with_counter
+from app.services import removal_service_regex
+from app.services.utils import TextUtils
 
 
 @pytest.fixture
@@ -65,5 +66,5 @@ class TestRegexService:
     def test_success_return_placeholder_with_counter(
         self, text: str, pattern, placeholder: str, expected_result: str
     ) -> None:
-        result = return_placeholder_with_counter(text, pattern, placeholder)
+        result = TextUtils.return_placeholder_with_counter(text, pattern, placeholder)
         assert result == expected_result

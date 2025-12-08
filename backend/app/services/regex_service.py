@@ -2,11 +2,7 @@ import re
 from typing import Tuple
 
 from app.services.base import PiiRule
-from app.services.utils import return_placeholder_with_counter
-
-# TODO
-# break into multiple files
-# add validation protocols
+from app.services.utils import TextUtils
 
 
 class RegexEmailRule:
@@ -20,7 +16,7 @@ class RegexEmailRule:
         return "EMAIL"
 
     def apply(self, text: str) -> str:
-        return return_placeholder_with_counter(
+        return TextUtils.return_placeholder_with_counter(
             text,
             self._pattern,
             self.placeholder,
@@ -39,7 +35,7 @@ class RegexIpv4Rule:
         return "IP_ADDRESS"
 
     def apply(self, text: str) -> str:
-        return return_placeholder_with_counter(
+        return TextUtils.return_placeholder_with_counter(
             text,
             self._pattern,
             self.placeholder,
@@ -66,7 +62,7 @@ class RegexIpv6Rule:
         return "IP_ADDRESS"
 
     def apply(self, text: str) -> str:
-        return return_placeholder_with_counter(
+        return TextUtils.return_placeholder_with_counter(
             text,
             self._pattern,
             self.placeholder,
@@ -82,7 +78,7 @@ class RegexUrlRule:
         return "URL"
 
     def apply(self, text: str) -> str:
-        return return_placeholder_with_counter(
+        return TextUtils.return_placeholder_with_counter(
             text,
             self._pattern,
             self.placeholder,

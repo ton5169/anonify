@@ -8,5 +8,5 @@ class ValidationServiceChecker:
     def validate(self, text: str) -> tuple[bool, str]:
         for rule in self._rules:
             if not rule.check(text):
-                return (False, f"Validation failed for rule: {rule.__class__.__name__}")
+                return (False, f"Validation failed: {rule.description()}")
         return (True, text)

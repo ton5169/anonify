@@ -16,6 +16,10 @@ class ValidationRule(Protocol):
         """Checks the input text against the validation rule."""
         ...
 
+    def description(self) -> str:
+        """Returns a description of the validation rule."""
+        ...
+
 
 class TextCleaner(Protocol):
     """Protocol for text cleaning services."""

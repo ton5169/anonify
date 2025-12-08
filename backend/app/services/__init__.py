@@ -6,18 +6,20 @@ from app.services.regex_service import (
     RegexUrlRule,
     RemovalServiceRegex,
 )
-from app.services.utils import return_placeholder_with_counter
 from app.services.validation_service import ValidationServiceChecker
 
+# rules
 regex_rules: list[PiiRule] = [
     RegexEmailRule(),
     RegexIpv4Rule(),
     RegexIpv6Rule(),
     RegexUrlRule(),
 ]
-
 validation_rules: list[ValidationRule] = []
 
-
+# services
 validation_service: ValidationService = ValidationServiceChecker(rules=validation_rules)
 removal_service_regex: TextCleaner = RemovalServiceRegex(rules=regex_rules)
+
+
+__all__ = ["validation_service", "removal_service_regex"]
