@@ -9,7 +9,7 @@ def regex_service():
     return removal_service_regex
 
 
-class TestPiiRemovalRegexService:
+class TestRegexService:
     @pytest.mark.parametrize(
         "original_text, expected_result",
         (

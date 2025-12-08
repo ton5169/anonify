@@ -23,3 +23,8 @@ EXPOSE 8000
 
 # Start the application
 CMD ["uv", "run", "uvicorn", "app.api.server:app", "--reload", "--workers", "1", "--host", "0.0.0.0", "--port", "8000"]
+
+
+
+# docker build -t anonify .
+# docker run -p 8000:8000 anonify:latest

@@ -1,48 +1,12 @@
 import re
-from typing import Protocol, Tuple
+from typing import Tuple
+
+from app.services.base import PiiRule
+from app.services.utils import return_placeholder_with_counter
 
 # TODO
 # break into multiple files
 # add validation protocols
-
-
-def return_placeholder_with_counter(text: str, pattern, placeholder: str) -> str:
-    """Utility to replace matches and number the placeholders."""
-
-    def replace_with_counter(match):
-        nonlocal count
-        count += 1
-        return f"[{placeholder}_{count}]"
-
-    temp_placeholder = f"__TEMP__{placeholder}__"
-    text, n = pattern.subn(temp_placeholder, text)
-
-    count = 0
-    if n > 0:
-        text = re.sub(re.escape(temp_placeholder), replace_with_counter, text)
-
-    return text
-
-
-class TextCleaner(Protocol):
-    """Protocol for text cleaning services."""
-
-    def clean(self, text: str) -> Tuple[str, str]:
-        """Cleans the input text and returns the cleaned text along with the method used."""
-        ...
-
-
-class PiiRule(Protocol):
-    """Protocol for PII removal rules."""
-
-    def apply(self, text: str) -> str:
-        """Applies the PII removal rule to the input text."""
-        ...
-
-    @property
-    def placeholder(self) -> str:
-        """Returns the placeholder used for this PII type."""
-        ...
 
 
 class RegexEmailRule:

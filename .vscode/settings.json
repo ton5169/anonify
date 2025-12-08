@@ -3,5 +3,6 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
 
-  "python.defaultInterpreterPath": "/mnt/c/Users/irshe/Desktop/anonify/.venv/bin/python"
+  "python.defaultInterpreterPath": "/mnt/c/Users/irshe/Desktop/anonify/.venv/bin/python",
+  "python.analysis.extraPaths": ["./backend"]
 }
