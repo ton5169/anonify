@@ -5,7 +5,7 @@ from app.services.base import PiiRule
 from app.services.utils import TextUtils
 
 
-class RegexEmailRule:
+class RegexRuleEmail:
     def __init__(self):
         self._pattern = re.compile(
             r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
@@ -23,7 +23,7 @@ class RegexEmailRule:
         )
 
 
-class RegexIpv4Rule:
+class RegexRuleIpv4:
     def __init__(self):
         self._pattern = re.compile(
             r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
@@ -42,7 +42,7 @@ class RegexIpv4Rule:
         )
 
 
-class RegexIpv6Rule:
+class RegexRuleIpv6:
     def __init__(self):
         self._pattern = re.compile(
             r"\b(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|"
@@ -69,7 +69,7 @@ class RegexIpv6Rule:
         )
 
 
-class RegexUrlRule:
+class RegexRuleUrl:
     def __init__(self):
         self._pattern = re.compile(r"\b(?:https?://|www\.)[^\s<>\"]+", re.IGNORECASE)
 

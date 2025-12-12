@@ -10,3 +10,10 @@ class ValidationServiceChecker:
             if not rule.check(text):
                 return (False, f"Validation failed: {rule.description()}")
         return (True, text)
+
+class ValidationRuleNonEmpty(ValidationRule):
+    def check(self, text: str) -> bool:
+        return bool(text and text.strip())
+
+    def description(self) -> str:
+        return "Input text is empty."

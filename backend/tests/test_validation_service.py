@@ -12,6 +12,9 @@ class TestValidationService:
         "original_text, expected_result",
         [
             ("Original text 1", (True, "Original text 1")),
+            ("", (False, "Validation failed: Input text is empty.")),
+            (None, (False, "Validation failed: Input text is empty.")),
+            ("       ", (False, "Validation failed: Input text is empty.")),
         ],
     )
     def test_return_valid_text(

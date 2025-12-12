@@ -21,7 +21,7 @@ class ValidationRule(Protocol):
         ...
 
 
-class TextCleaner(Protocol):
+class TextAnonify(Protocol):
     """Protocol for text cleaning services."""
 
     def clean(self, text: str) -> Tuple[str, str]:
