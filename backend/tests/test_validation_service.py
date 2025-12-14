@@ -1,10 +1,13 @@
 import pytest
-from app.services import validation_service as vs
+from app.services.validation_service import (
+    ValidationRuleNonEmpty,
+    ValidationServiceChecker,
+)
 
 
 @pytest.fixture
 def validation_service():
-    return vs
+    return ValidationServiceChecker(rules=[ValidationRuleNonEmpty()])
 
 
 class TestValidationService:

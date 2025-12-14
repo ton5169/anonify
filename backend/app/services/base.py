@@ -1,8 +1,19 @@
 from typing import Protocol, Tuple
 
 
+class HtmlService(Protocol):
+    """Protocol for HTML processing service."""
+
+    def clean(self, html: str) -> str:
+        """Cleans the input HTML and returns the cleaned HTML."""
+        ...
+
+    def restore(self, text: str) -> str:
+        """Restores the cleaned text back to HTML format."""
+        ...
+
 class ValidationService(Protocol):
-    """Protocol for validation services."""
+    """Protocol for validation service."""
 
     def validate(self, text: str) -> Tuple[bool, str]:
         """Validates the input text and returns a tuple of (is_valid, message)."""

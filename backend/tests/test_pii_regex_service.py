@@ -1,13 +1,20 @@
 import re
 
 import pytest
-from app.services import removal_service_regex
+from app.services.regex_service import (
+    RegexRuleEmail,
+    RegexRuleIpv4,
+    RegexRuleIpv6,
+    RegexRuleUrl,
+    RemovalServiceRegex,
+)
 from app.services.utils import TextUtils
 
 
 @pytest.fixture
 def regex_service():
-    return removal_service_regex
+    rules = [RegexRuleEmail(), RegexRuleIpv4(), RegexRuleIpv6(), RegexRuleUrl()]
+    return RemovalServiceRegex(rules=rules)
 
 
 class TestRegexService:
