@@ -1,11 +1,34 @@
 import re
+from abc import ABC, abstractmethod
 from typing import Tuple
 
-from app.services.base import PiiRule
+from app.services.base import CleanedTextResult, PiiRule, RuleResult, TextAnonify
 from app.services.utils import TextUtils
 
 
-class RegexRuleEmail:
+class BaseRegexRule(PiiRule, ABC):
+    _pattern: re.Pattern[str]
+
+    @property
+    @abstractmethod
+    def placeholder(self) -> str: ...
+
+    def _apply_rule_and_get_replaced_values(self, text: str) -> RuleResult:
+        text, replaced_values = TextUtils.return_placeholder_with_counter(
+            text,
+            self._pattern,
+            self.placeholder,
+        )
+        return RuleResult(text, replaced_values)
+
+    def apply(self, text: str) -> str:
+        return self._apply_rule_and_get_replaced_values(text).text
+
+    def replaced_values(self, text: str) -> dict[str, str]:
+        return self._apply_rule_and_get_replaced_values(text).replaced_values
+
+
+class RegexRuleEmail(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
             r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
@@ -15,15 +38,8 @@ class RegexRuleEmail:
     def placeholder(self) -> str:
         return "EMAIL"
 
-    def apply(self, text: str) -> str:
-        return TextUtils.return_placeholder_with_counter(
-            text,
-            self._pattern,
-            self.placeholder,
-        )
 
-
-class RegexRuleIpv4:
+class RegexRuleIpv4(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
             r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
@@ -34,15 +50,8 @@ class RegexRuleIpv4:
     def placeholder(self) -> str:
         return "IP_ADDRESS"
 
-    def apply(self, text: str) -> str:
-        return TextUtils.return_placeholder_with_counter(
-            text,
-            self._pattern,
-            self.placeholder,
-        )
 
-
-class RegexRuleIpv6:
+class RegexRuleIpv6(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
             r"\b(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|"
@@ -61,15 +70,8 @@ class RegexRuleIpv6:
     def placeholder(self) -> str:
         return "IP_ADDRESS"
 
-    def apply(self, text: str) -> str:
-        return TextUtils.return_placeholder_with_counter(
-            text,
-            self._pattern,
-            self.placeholder,
-        )
 
-
-class RegexRuleUrl:
+class RegexRuleUrl(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(r"\b(?:https?://|www\.)[^\s<>\"]+", re.IGNORECASE)
 
@@ -77,22 +79,45 @@ class RegexRuleUrl:
     def placeholder(self) -> str:
         return "URL"
 
-    def apply(self, text: str) -> str:
-        return TextUtils.return_placeholder_with_counter(
-            text,
-            self._pattern,
-            self.placeholder,
-        )
 
-
-class RemovalServiceRegex:
+class RemovalServiceRegex(TextAnonify):
     def __init__(self, rules: list[PiiRule]):
         self._rules = rules
         self._method_id = "regex"
 
-    def clean(self, text: str) -> Tuple[str, str]:
+    def _apply_rules(self, text: str) -> Tuple[str, str]:
         cleaned_text = text
         for rule in self._rules:
             cleaned_text = rule.apply(cleaned_text)
 
         return cleaned_text, self._method_id
+
+    def replaced_count(self, text: str) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        for rule in self._rules:
+            pattern = re.compile(rf"\[{rule.placeholder}_(\d+)\]", re.IGNORECASE)
+            unique_matches = set(pattern.findall(text))
+            if unique_matches:
+                counts[rule.placeholder] = len(unique_matches)
+
+        return counts
+
+    def replaced_values(self, text: str) -> dict[str, str]:
+        all_replaced_values: dict[str, str] = {}
+        for rule in self._rules:
+            replaced_values = rule.replaced_values(text)
+            all_replaced_values.update(replaced_values)
+
+        return all_replaced_values
+
+    def clean(self, text: str) -> CleanedTextResult:
+        cleaned_text, method_id = self._apply_rules(text)
+        replaced_values = self.replaced_values(text)
+        replaced_count = self.replaced_count(text)
+
+        return CleanedTextResult(
+            method_id=method_id,
+            cleaned_text=cleaned_text,
+            replaced_values=replaced_values,
+            replaced_count=replaced_count,
+        )

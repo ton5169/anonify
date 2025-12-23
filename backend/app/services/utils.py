@@ -1,21 +1,23 @@
-import re
+from typing import Tuple
 
 
 class TextUtils:
     @staticmethod
-    def return_placeholder_with_counter(text: str, pattern, placeholder: str) -> str:
+    def return_placeholder_with_counter(
+        text: str, pattern, placeholder: str
+    ) -> Tuple[str, dict[str, str]]:
         """Utility to replace matches and number the placeholders."""
+
+        replaced_values: dict[str, str] = {}
+        count = 0
 
         def replace_with_counter(match):
             nonlocal count
             count += 1
-            return f"[{placeholder}_{count}]"
+            placeholder_with_counter = f"[{placeholder}_{count}]"
+            replaced_values[f"{placeholder}_{count}"] = match.group(0)
+            return placeholder_with_counter
 
-        temp_placeholder = f"__TEMP__{placeholder}__"
-        text, n = pattern.subn(temp_placeholder, text)
+        text = pattern.sub(replace_with_counter, text)
 
-        count = 0
-        if n > 0:
-            text = re.sub(re.escape(temp_placeholder), replace_with_counter, text)
-
-        return text
+        return text, replaced_values

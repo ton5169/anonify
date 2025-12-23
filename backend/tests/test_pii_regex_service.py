@@ -44,8 +44,8 @@ class TestRegexService:
         expected_result: str,
     ) -> None:
         result = regex_service.clean(original_text)
-        assert result[0] == expected_result
-        assert result[1] == "regex"
+        assert result.cleaned_text == expected_result
+        assert result.method_id == "regex"
 
     @pytest.mark.parametrize(
         "text, pattern, placeholder, expected_result",
@@ -73,5 +73,41 @@ class TestRegexService:
     def test_success_return_placeholder_with_counter(
         self, text: str, pattern, placeholder: str, expected_result: str
     ) -> None:
-        result = TextUtils.return_placeholder_with_counter(text, pattern, placeholder)
+        result, _ = TextUtils.return_placeholder_with_counter(
+            text, pattern, placeholder
+        )
+        assert result == expected_result
+
+    @pytest.mark.parametrize(
+        "text, expected_result",
+        [
+            (
+                "My email is fakemail@mail.com and my IP is 192.168.1.1",
+                {
+                    "EMAIL_1": "fakemail@mail.com",
+                    "IP_ADDRESS_1": "192.168.1.1",
+                },
+            ),
+        ],
+    )
+    def test_replaced_values(
+        self, regex_service, text: str, expected_result: dict
+    ) -> None:
+        result = regex_service.replaced_values(text)
+        assert result == expected_result
+
+    @pytest.mark.parametrize(
+        "text, expected_result",
+        [
+            (
+                "My email is fakemail@mail.com and my IP is 192.168.1.1",
+                {"EMAIL": 1, "IP_ADDRESS": 1},
+            ),
+        ],
+    )
+    def test_replaced_count(
+        self, regex_service, text: str, expected_result: dict
+    ) -> None:
+        clean_result = regex_service.clean(text)
+        result = regex_service.replaced_count(clean_result.cleaned_text)
         assert result == expected_result
