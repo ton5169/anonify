@@ -14,7 +14,7 @@ class RuleResult:
 class CleanedTextResult:
     """Class to hold the result of cleaning text."""
 
-    method_id: str
+    method: str
     cleaned_text: str
     replaced_values: dict[str, str]
     replaced_count: dict[str, int]
@@ -30,6 +30,7 @@ class HtmlService(Protocol):
     def restore(self, text: str) -> str:
         """Restores the cleaned text back to HTML format."""
         ...
+
 
 class ValidationService(Protocol):
     """Protocol for validation service."""

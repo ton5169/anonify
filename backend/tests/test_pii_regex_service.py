@@ -45,7 +45,7 @@ class TestRegexService:
     ) -> None:
         result = regex_service.clean(original_text)
         assert result.cleaned_text == expected_result
-        assert result.method_id == "regex"
+        assert result.method == "regex"
 
     @pytest.mark.parametrize(
         "text, pattern, placeholder, expected_result",

@@ -11,6 +11,8 @@ async def remove_pii(input: PiiIn) -> PiiOut:
     cleaned_result = removal_service_regex.clean(input.original_text)
     return PiiOut(
         original_text=input.original_text,
-        clean_text=cleaned_result.cleaned_text,
-        clean_method=cleaned_result.method_id,
+        cleaned_text=cleaned_result.cleaned_text,
+        method=cleaned_result.method,
+        replaced_values=cleaned_result.replaced_values,
+        replaced_count=cleaned_result.replaced_count,
     )

@@ -1,13 +1,14 @@
 # TODO
 
 ## crit
-# think through how to handle restoration of html after cleaning?? no idea
 
 
 ## high priority
-# continue on html service
+# implement tests for using regex service inside the route
+# add regex cleaning method to the /clean endpoint
+# add html_clean query param to the /clean endpoint
 
 
 ## low priority
-# add text cleaning protocol and service
+# implement logging across the app
 # add validation rules (maybe more? don't know yet)

@@ -83,14 +83,14 @@ class RegexRuleUrl(BaseRegexRule):
 class RemovalServiceRegex(TextAnonify):
     def __init__(self, rules: list[PiiRule]):
         self._rules = rules
-        self._method_id = "regex"
+        self._method = "regex"
 
     def _apply_rules(self, text: str) -> Tuple[str, str]:
         cleaned_text = text
         for rule in self._rules:
             cleaned_text = rule.apply(cleaned_text)
 
-        return cleaned_text, self._method_id
+        return cleaned_text, self._method
 
     def replaced_count(self, text: str) -> dict[str, int]:
         counts: dict[str, int] = {}
@@ -111,12 +111,12 @@ class RemovalServiceRegex(TextAnonify):
         return all_replaced_values
 
     def clean(self, text: str) -> CleanedTextResult:
-        cleaned_text, method_id = self._apply_rules(text)
+        cleaned_text, method = self._apply_rules(text)
         replaced_values = self.replaced_values(text)
-        replaced_count = self.replaced_count(text)
+        replaced_count = self.replaced_count(cleaned_text)
 
         return CleanedTextResult(
-            method_id=method_id,
+            method=method,
             cleaned_text=cleaned_text,
             replaced_values=replaced_values,
             replaced_count=replaced_count,

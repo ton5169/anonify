@@ -11,5 +11,7 @@ class PiiIn(PiiBase):
 
 
 class PiiOut(PiiBase):
-    clean_text: str
-    clean_method: str | None = None
+    cleaned_text: str
+    method: str | None = None
+    replaced_values: dict[str, str] = Field(default_factory=dict)
+    replaced_count: dict[str, int] = Field(default_factory=dict)
