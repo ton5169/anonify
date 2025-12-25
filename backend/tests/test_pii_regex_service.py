@@ -48,22 +48,25 @@ class TestRegexService:
         assert result.method == "regex"
 
     @pytest.mark.parametrize(
-        "text, pattern, placeholder, expected_result",
+        "text, method, pattern, placeholder, expected_result",
         [
             (
                 "Multiple URL here URL URL",
+                "regex",
                 re.compile(r"URL"),
                 "URL",
                 "Multiple [URL_1] here [URL_2] [URL_3]",
             ),
             (
                 "Text without placeholder",
+                "regex",
                 re.compile(r"EMAIL"),
                 "EMAIL",
                 "Text without placeholder",
             ),
             (
                 "One IP_ADDRESS here",
+                "regex",
                 re.compile(r"IP_ADDRESS"),
                 "IP_ADDRESS",
                 "One [IP_ADDRESS_1] here",
@@ -71,10 +74,10 @@ class TestRegexService:
         ],
     )
     def test_success_return_placeholder_with_counter(
-        self, text: str, pattern, placeholder: str, expected_result: str
+        self, text: str, method: str, pattern, placeholder: str, expected_result: str
     ) -> None:
         result, _ = TextUtils.return_placeholder_with_counter(
-            text, pattern, placeholder
+            text, method, pattern, placeholder
         )
         assert result == expected_result
 

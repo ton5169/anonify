@@ -13,21 +13,20 @@ class BaseRegexRule(PiiRule, ABC):
     @abstractmethod
     def placeholder(self) -> str: ...
 
-    def _apply_rule_and_get_replaced_values(self, text: str) -> RuleResult:
+    def _apply_rule_and_get_replaced_values(self, text: str, method: str) -> RuleResult:
         text, replaced_values = TextUtils.return_placeholder_with_counter(
             text,
+            method,
             self._pattern,
             self.placeholder,
         )
         return RuleResult(text, replaced_values)
 
-    def apply(self, text: str) -> str:
-        return self._apply_rule_and_get_replaced_values(text).text
+    def apply(self, text: str, method: str = "regex") -> str:
+        return self._apply_rule_and_get_replaced_values(text, method).text
 
-    def replaced_values(self, text: str) -> dict[str, str]:
-        return self._apply_rule_and_get_replaced_values(text).replaced_values
-
-
+    def replaced_values(self, text: str, method: str = "regex") -> dict[str, str]:
+        return self._apply_rule_and_get_replaced_values(text, method).replaced_values
 class RegexRuleEmail(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
@@ -88,7 +87,7 @@ class RemovalServiceRegex(TextAnonify):
     def _apply_rules(self, text: str) -> Tuple[str, str]:
         cleaned_text = text
         for rule in self._rules:
-            cleaned_text = rule.apply(cleaned_text)
+            cleaned_text = rule.apply(cleaned_text, self._method)
 
         return cleaned_text, self._method
 
@@ -105,7 +104,7 @@ class RemovalServiceRegex(TextAnonify):
     def replaced_values(self, text: str) -> dict[str, str]:
         all_replaced_values: dict[str, str] = {}
         for rule in self._rules:
-            replaced_values = rule.replaced_values(text)
+            replaced_values = rule.replaced_values(text, self._method)
             all_replaced_values.update(replaced_values)
 
         return all_replaced_values

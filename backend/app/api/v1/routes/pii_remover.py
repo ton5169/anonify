@@ -1,18 +1,43 @@
+from app.core.errors import ServiceError, ValidationError
 from app.models.pii import PiiIn, PiiOut
-from app.services import removal_service_regex
-from fastapi import APIRouter
-from starlette.status import HTTP_201_CREATED
+from app.services import html_service, removal_service_regex, validation_service
+from app.services.orchestrator import Orchestrator
+from fastapi import APIRouter, HTTPException
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 router = APIRouter()
 
 
-@router.post("/clean", name="pii:remover", status_code=HTTP_201_CREATED)
-async def remove_pii(input: PiiIn) -> PiiOut:
-    cleaned_result = removal_service_regex.clean(input.original_text)
+@router.post("/clean", name="pii:remover", status_code=HTTP_200_OK)
+async def remove_pii(
+    input: PiiIn,
+    clean_html: bool = False,
+) -> PiiOut:
+    orchestrator = Orchestrator(
+        input=input,
+        clean_services=[removal_service_regex],
+        validation_services=[validation_service],
+        html_service=html_service,
+        clean_html=clean_html,
+    )
+
+    try:
+        cleaned_result = orchestrator.run_pipeline()
+    except ValidationError as ve:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=ve.message)
+    except ServiceError as se:
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=se.message
+        )
+
     return PiiOut(
         original_text=input.original_text,
         cleaned_text=cleaned_result.cleaned_text,
-        method=cleaned_result.method,
+        methods=cleaned_result.methods,
         replaced_values=cleaned_result.replaced_values,
         replaced_count=cleaned_result.replaced_count,
     )

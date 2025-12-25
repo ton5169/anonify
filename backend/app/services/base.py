@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol, Tuple
+from typing import Dict, Protocol, Tuple
 
 
 @dataclass
@@ -7,7 +7,7 @@ class RuleResult:
     """Class to hold the result of applying a PII rule."""
 
     text: str
-    replaced_values: dict[str, str]
+    replaced_values: Dict[str, str]
 
 
 @dataclass
@@ -16,8 +16,8 @@ class CleanedTextResult:
 
     method: str
     cleaned_text: str
-    replaced_values: dict[str, str]
-    replaced_count: dict[str, int]
+    replaced_values: Dict[str, str]
+    replaced_count: Dict[str, int]
 
 
 class HtmlService(Protocol):
@@ -59,11 +59,11 @@ class TextAnonify(Protocol):
         """Cleans the input text and returns the cleaned text along with the method used."""
         ...
 
-    def replaced_values(self, text: str) -> dict[str, str]:
+    def replaced_values(self, text: str) -> Dict[str, str]:
         """Returns a dictionary of replaced values in the cleaned text."""
         ...
 
-    def replaced_count(self, text: str) -> dict[str, int]:
+    def replaced_count(self, text: str) -> Dict[str, int]:
         """Returns a dictionary of counts of replaced values in the cleaned text."""
         ...
 
@@ -76,10 +76,10 @@ class PiiRule(Protocol):
         """Returns the placeholder used for this PII type."""
         ...
 
-    def apply(self, text: str) -> str:
+    def apply(self, text: str, method: str) -> str:
         """Applies the PII removal rule to the input text."""
         ...
 
-    def replaced_values(self, text: str) -> dict[str, str]:
+    def replaced_values(self, text: str, method: str) -> dict[str, str]:
         """Returns a dictionary of replaced values for this PII type."""
         ...
