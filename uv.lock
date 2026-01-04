@@ -29,6 +29,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "pydantic" },
     { name = "requests" },
+    { name = "uvloop" },
 ]
 
 [package.dev-dependencies]
@@ -45,6 +46,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.119.1" },
     { name = "pydantic", specifier = ">=2.12.3" },
     { name = "requests", specifier = ">=2.32.5" },
+    { name = "uvloop", specifier = ">=0.22.1" },
 ]
 
 [package.metadata.requires-dev]

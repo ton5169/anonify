@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/clean", name="pii:remover", status_code=HTTP_200_OK)
-async def remove_pii(
+def remove_pii(
     input: PiiIn,
     clean_html: bool = False,
 ) -> PiiOut:
