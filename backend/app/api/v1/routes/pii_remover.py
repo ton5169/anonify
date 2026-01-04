@@ -1,6 +1,11 @@
 from app.core.errors import ServiceError, ValidationError
 from app.models.pii import PiiIn, PiiOut
-from app.services import html_service, removal_service_regex, validation_service
+from app.services import (
+    html_service,
+    removal_service_model,
+    removal_service_regex,
+    validation_service,
+)
 from app.services.orchestrator import Orchestrator
 from fastapi import APIRouter, HTTPException
 from starlette.status import (
@@ -19,7 +24,7 @@ def remove_pii(
 ) -> PiiOut:
     orchestrator = Orchestrator(
         input=input,
-        clean_services=[removal_service_regex],
+        clean_services=[removal_service_regex, removal_service_model],
         validation_services=[validation_service],
         html_service=html_service,
         clean_html=clean_html,

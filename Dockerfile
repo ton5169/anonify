@@ -10,10 +10,13 @@ COPY pyproject.toml uv.lock ./
 
 # Install dependencies in separate folder to access it not dependant on the source code
 ENV UV_PROJECT_ENVIRONMENT=/opt/venv
-RUN uv sync --frozen --no-cache --no-dev
+RUN uv sync --frozen --no-dev
 
 # Copy the source code
-COPY /backend .
+COPY backend/ .
+
+# Copy environment file used by Config
+COPY backend/.env ./.env
 
 # Set environment variables
 ENV PYTHONPATH=/backend
@@ -22,7 +25,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 EXPOSE 8000
 
 # Start the application
-CMD ["uv", "run", "uvicorn", "app.api.server:app", "--reload", "--workers", "1", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--group", "prod", "uvicorn", "app.api.server:app", "--reload", "--workers", "1", "--host", "0.0.0.0", "--port", "8000"]
 
 
 

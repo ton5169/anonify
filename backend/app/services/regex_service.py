@@ -1,6 +1,6 @@
 import re
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import List, Tuple
 
 from app.services.base import CleanedTextResult, PiiRule, RuleResult, TextAnonify
 from app.services.utils import TextUtils
@@ -14,19 +14,26 @@ class BaseRegexRule(PiiRule, ABC):
     def placeholder(self) -> str: ...
 
     def _apply_rule_and_get_replaced_values(self, text: str, method: str) -> RuleResult:
-        text, replaced_values = TextUtils.return_placeholder_with_counter(
-            text,
-            method,
-            self._pattern,
-            self.placeholder,
+        text, replaced_count, replaced_values = (
+            TextUtils.return_placeholder_with_counter(
+                text,
+                method,
+                self._pattern,
+                self.placeholder,
+            )
         )
-        return RuleResult(text, replaced_values)
+        return RuleResult(text, replaced_values, replaced_count)
 
     def apply(self, text: str, method: str = "regex") -> str:
         return self._apply_rule_and_get_replaced_values(text, method).text
 
     def replaced_values(self, text: str, method: str = "regex") -> dict[str, str]:
         return self._apply_rule_and_get_replaced_values(text, method).replaced_values
+
+    def replaced_count(self, text: str, method: str = "regex") -> dict[str, int]:
+        return self._apply_rule_and_get_replaced_values(text, method).replaced_count
+
+
 class RegexRuleEmail(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(

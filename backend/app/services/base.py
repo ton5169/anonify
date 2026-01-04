@@ -8,7 +8,7 @@ class RuleResult:
 
     text: str
     replaced_values: Dict[str, str]
-
+    replaced_count: Dict[str, int]
 
 @dataclass
 class CleanedTextResult:
@@ -82,4 +82,8 @@ class PiiRule(Protocol):
 
     def replaced_values(self, text: str, method: str) -> dict[str, str]:
         """Returns a dictionary of replaced values for this PII type."""
+        ...
+
+    def replaced_count(self, text: str, method: str) -> dict[str, int]:
+        """Returns a dictionary of counts of replaced values for this PII type."""
         ...

@@ -1,9 +1,14 @@
 from app.services.base import (
+    HtmlService,
     PiiRule,
     TextAnonify,
     ValidationRule,
     ValidationService,
-    HtmlService,
+)
+from app.services.html_service import HtmlService as hs
+from app.services.model_service import (
+    ModelRuleAbAi,
+    RemovalServiceModel,
 )
 from app.services.regex_service import (
     RegexRuleEmail,
@@ -17,8 +22,6 @@ from app.services.validation_service import (
     ValidationServiceChecker,
 )
 
-from app.services.html_service import HtmlService as hs
-
 # rules
 regex_rules: list[PiiRule] = [
     RegexRuleEmail(),
@@ -26,6 +29,10 @@ regex_rules: list[PiiRule] = [
     RegexRuleIpv6(),
     RegexRuleUrl(),
 ]
+model_rules: list[PiiRule] = [
+    ModelRuleAbAi(),
+]
+
 validation_rules: list[ValidationRule] = [
     ValidationRuleNonEmpty(),
 ]
@@ -34,6 +41,12 @@ validation_rules: list[ValidationRule] = [
 html_service: HtmlService = hs()
 validation_service: ValidationService = ValidationServiceChecker(rules=validation_rules)
 removal_service_regex: TextAnonify = RemovalServiceRegex(rules=regex_rules)
+removal_service_model: TextAnonify = RemovalServiceModel(rules=model_rules)
 
 
-__all__ = ["validation_service", "removal_service_regex"]
+__all__ = [
+    "validation_service",
+    "removal_service_regex",
+    "removal_service_model",
+    "html_service",
+]

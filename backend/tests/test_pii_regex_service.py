@@ -76,7 +76,7 @@ class TestRegexService:
     def test_success_return_placeholder_with_counter(
         self, text: str, method: str, pattern, placeholder: str, expected_result: str
     ) -> None:
-        result, _ = TextUtils.return_placeholder_with_counter(
+        result, _, _ = TextUtils.return_placeholder_with_counter(
             text, method, pattern, placeholder
         )
         assert result == expected_result
