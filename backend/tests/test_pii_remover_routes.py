@@ -12,10 +12,25 @@ def pii_out():
     return PiiOut(
         original_text="My name is John Doe and my email is fakemail@mail.com.",
         cleaned_text="My name is John Doe and my email is [EMAIL_1].",
-        methods=["regex"],
+        methods=["regex", "model"],
         replaced_values={"regex:EMAIL_1": "fakemail@mail.com"},
         replaced_count={"regex:EMAIL": 1},
     )
+
+
+@pytest.fixture(autouse=True)
+def mock_model_pipeline(monkeypatch):
+    """Mock the HuggingFace pipeline to avoid loading the actual model in tests."""
+    import app.services.model_service as ms
+
+    def fake_pipeline(*args, **kwargs):
+        def run(text: str):
+            # Return empty list so model service doesn't find any entities
+            return []
+
+        return run
+
+    monkeypatch.setattr(ms, "pipeline", fake_pipeline)
 
 
 class TestPiiRemoverRoutes:

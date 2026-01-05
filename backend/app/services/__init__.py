@@ -8,6 +8,7 @@ from app.services.base import (
 from app.services.html_service import HtmlService as hs
 from app.services.model_service import (
     ModelRuleAbAi,
+    ModelRuleBertBase,
     RemovalServiceModel,
 )
 from app.services.regex_service import (
@@ -31,6 +32,7 @@ regex_rules: list[PiiRule] = [
 ]
 model_rules: list[PiiRule] = [
     ModelRuleAbAi(),
+    ModelRuleBertBase(),
 ]
 
 validation_rules: list[ValidationRule] = [

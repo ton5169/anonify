@@ -4,8 +4,7 @@
 
 
 ## high priority
-fix issue with .env not loading in Docker container
-add some tests for model service
+add logging sctructlog
 
 ## low priority
 # implement logging across the app

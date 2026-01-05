@@ -101,10 +101,8 @@ class RemovalServiceRegex(TextAnonify):
     def replaced_count(self, text: str) -> dict[str, int]:
         counts: dict[str, int] = {}
         for rule in self._rules:
-            pattern = re.compile(rf"\[{rule.placeholder}_(\d+)\]", re.IGNORECASE)
-            unique_matches = set(pattern.findall(text))
-            if unique_matches:
-                counts[rule.placeholder] = len(unique_matches)
+            replaced_count = rule.replaced_count(text, self._method)
+            counts.update(replaced_count)
 
         return counts
 
@@ -119,7 +117,7 @@ class RemovalServiceRegex(TextAnonify):
     def clean(self, text: str) -> CleanedTextResult:
         cleaned_text, method = self._apply_rules(text)
         replaced_values = self.replaced_values(text)
-        replaced_count = self.replaced_count(cleaned_text)
+        replaced_count = self.replaced_count(text)
 
         return CleanedTextResult(
             method=method,

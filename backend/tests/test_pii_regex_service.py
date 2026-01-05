@@ -87,8 +87,8 @@ class TestRegexService:
             (
                 "My email is fakemail@mail.com and my IP is 192.168.1.1",
                 {
-                    "EMAIL_1": "fakemail@mail.com",
-                    "IP_ADDRESS_1": "192.168.1.1",
+                    "regex:EMAIL_1": "fakemail@mail.com",
+                    "regex:IP_ADDRESS_1": "192.168.1.1",
                 },
             ),
         ],
@@ -104,7 +104,7 @@ class TestRegexService:
         [
             (
                 "My email is fakemail@mail.com and my IP is 192.168.1.1",
-                {"EMAIL": 1, "IP_ADDRESS": 1},
+                {"regex:EMAIL": 1, "regex:IP_ADDRESS": 1},
             ),
         ],
     )
@@ -112,5 +112,5 @@ class TestRegexService:
         self, regex_service, text: str, expected_result: dict
     ) -> None:
         clean_result = regex_service.clean(text)
-        result = regex_service.replaced_count(clean_result.cleaned_text)
+        result = regex_service.replaced_count(text)
         assert result == expected_result

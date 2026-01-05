@@ -4,5 +4,6 @@
   "python.testing.pytestEnabled": true,
 
   "python.defaultInterpreterPath": "/mnt/c/Users/irshe/Desktop/anonify/.venv/bin/python",
-  "python.analysis.extraPaths": ["./backend"]
+  "python.analysis.extraPaths": ["./backend"],
+  "cursorpyright.analysis.extraPaths": ["./backend"]
 }

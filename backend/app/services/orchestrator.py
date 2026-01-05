@@ -49,13 +49,8 @@ class Orchestrator:
                 text = result.cleaned_text
                 methods.append(result.method)
 
-                for k, v in result.replaced_values.items():
-                    namespaced_key = f"{result.method}:{k}"
-                    replaced_values[namespaced_key] = v
-
-                for k, v in result.replaced_count.items():
-                    namespaced_key = f"{result.method}:{k}"
-                    replaced_count[namespaced_key] = v
+                replaced_values.update(result.replaced_values)
+                replaced_count.update(result.replaced_count)
         except Exception as e:
             raise ServiceError(
                 f"An error occurred during service {service.__class__.__name__}: {e}"

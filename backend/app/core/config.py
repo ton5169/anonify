@@ -1,6 +1,12 @@
+import os
 from starlette.config import Config
 
-config = Config(".env")
+from dotenv import load_dotenv
+
+env_file_path = os.getenv("ENV_FILE", ".env")
+load_dotenv(env_file_path, override=False)
+
+config = Config(env_file_path)
 
 PROJECT_NAME = "Anonify"
 VERSION = "1.0.0"
