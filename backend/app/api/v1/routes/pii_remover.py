@@ -1,3 +1,5 @@
+import logging
+
 from app.core.errors import ServiceError, ValidationError
 from app.models.pii import PiiIn, PiiOut
 from app.services import (
@@ -13,6 +15,9 @@ from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
+logger = logging.getLogger("anonify")
+
 
 router = APIRouter()
 

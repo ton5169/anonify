@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "filters": {
+    "non_error_filter": {
+      "()": "app.core.logging_config.NonErrorFilter"
+    },
+    "error_filter": {
+      "()": "app.core.logging_config.ErrorFilter"
+    },
+    "duplicate_filter": {
+      "()": "app.core.logging_config.DuplicateFilter"
+    },
+    "exclude_uvicorn_prefix": {
+      "()": "app.core.logging_config.LoggerNameFilter",
+      "exclude_prefixes": ["uvicorn."]
+    },
+    "include_uvicorn_only": {
+      "()": "app.core.logging_config.LoggerNameFilter",
+      "include_names": ["uvicorn", "uvicorn.error", "uvicorn.access"]
+    }
+  },
+  "formatters": {
+    "simple": {
+      "()": "app.core.logging_config.ColoredFormatter",
+      "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+      "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+      "use_colors": true
+    },
+    "json": {
+      "()": "app.core.logging_config.MyJSONFormatter",
+      "fmt_keys": {
+        "level": "levelname",
+        "message": "message",
+        "timestamp": "timestamp",
+        "logger": "name",
+        "module": "module",
+        "function": "funcName",
+        "line": "lineno",
+        "thread_name": "threadName"
+      }
+    }
+  },
+  "handlers": {
+    "stdout": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "simple",
+      "stream": "ext://sys.stdout",
+      "filters": [
+        "exclude_uvicorn_prefix",
+        "non_error_filter",
+        "duplicate_filter"
+      ]
+    },
+    "stderr": {
+      "class": "logging.StreamHandler",
+      "level": "WARNING",
+      "formatter": "simple",
+      "stream": "ext://sys.stderr",
+      "filters": ["error_filter", "duplicate_filter"]
+    },
+    "file": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "json",
+      "filename": "backend/app/logs/app.log.jsonl",
+      "maxBytes": 100000,
+      "backupCount": 3,
+      "filters": ["exclude_uvicorn_prefix"]
+    },
+    "uvicorn_file": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "json",
+      "filename": "backend/app/logs/uvicorn.log.jsonl",
+      "maxBytes": 100000,
+      "backupCount": 3,
+      "filters": ["include_uvicorn_only"]
+    },
+    "queue": {
+      "class": "logging.handlers.QueueHandler",
+      "handlers": ["stdout", "stderr", "file", "uvicorn_file"],
+      "respect_handler_level": true
+    }
+  },
+  "loggers": {
+    "root": {
+      "level": "DEBUG",
+      "handlers": ["queue"]
+    }
+  }
+}
