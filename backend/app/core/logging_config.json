@@ -39,13 +39,18 @@
         "line": "lineno",
         "thread_name": "threadName"
       }
+    },
+    "serilog": {
+      "()": "app.core.logging_config.MySerilogFormatter",
+      "include_rendered_message": true,
+      "include_message_template": true
     }
   },
   "handlers": {
     "stdout": {
       "class": "logging.StreamHandler",
       "level": "DEBUG",
-      "formatter": "simple",
+      "formatter": "serilog",
       "stream": "ext://sys.stdout",
       "filters": [
         "exclude_uvicorn_prefix",
@@ -56,7 +61,7 @@
     "stderr": {
       "class": "logging.StreamHandler",
       "level": "WARNING",
-      "formatter": "simple",
+      "formatter": "serilog",
       "stream": "ext://sys.stderr",
       "filters": ["error_filter", "duplicate_filter"]
     },

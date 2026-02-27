@@ -6,7 +6,10 @@ import logging.config
 import pathlib
 from typing import override
 
+from app.core.config import LOG_LEVEL
+
 logger = logging.getLogger('anonify')
+logger.setLevel(LOG_LEVEL)
 
 
 def setup_logging():
@@ -21,6 +24,7 @@ def setup_logging():
 
     for logger_name in loggers:
         logging_logger = logging.getLogger(logger_name)
+        logging_logger.setLevel(LOG_LEVEL)
         logging_logger.handlers = []
         logging_logger.propagate = True
 
@@ -141,6 +145,99 @@ class MyJSONFormatter(logging.Formatter):
                 message[key] = val
 
         return message
+
+
+class MySerilogFormatter(logging.Formatter):
+    """
+    Serilog-compatible JSON formatter.
+
+    Output shape (common Serilog JSON conventions):
+      - Timestamp (ISO-8601, UTC, with 'Z')
+      - Level (Verbose/Debug/Information/Warning/Error/Fatal)
+      - MessageTemplate
+      - RenderedMessage
+      - Exception (optional)
+      - SourceContext (logger name)
+      - Properties (custom/extra fields + useful context)
+    """
+
+    _LEVEL_MAP = {
+        'DEBUG': 'Debug',
+        'INFO': 'Information',
+        'WARNING': 'Warning',
+        'ERROR': 'Error',
+        'CRITICAL': 'Fatal',
+    }
+
+    def __init__(
+        self,
+        *,
+        include_rendered_message: bool = True,
+        include_message_template: bool = True,
+    ):
+        super().__init__()
+        self.include_rendered_message = include_rendered_message
+        self.include_message_template = include_message_template
+
+    @override
+    def format(self, record: logging.LogRecord) -> str:
+        payload = self._prepare_serilog_dict(record)
+        return json.dumps(payload, default=str)
+
+    def _prepare_serilog_dict(self, record: logging.LogRecord) -> dict:
+        # Timestamp in UTC, Serilog-style (often ends with 'Z')
+        ts = dt.datetime.fromtimestamp(record.created, tz=dt.UTC).isoformat()
+        if ts.endswith('+00:00'):
+            ts = ts[:-6] + 'Z'
+
+        level = self._LEVEL_MAP.get(record.levelname, record.levelname.title())
+
+        # Build core event
+        event: dict = {
+            'Timestamp': ts,
+            'Level': level,
+            'SourceContext': record.name,
+        }
+
+        if self.include_message_template:
+            # record.msg is the unrendered template-ish message
+            try:
+                event['MessageTemplate'] = (
+                    record.msg
+                    if isinstance(record.msg, str)
+                    else str(record.msg)
+                )
+            except Exception:
+                event['MessageTemplate'] = '<unavailable>'
+
+        if self.include_rendered_message:
+            event['RenderedMessage'] = record.getMessage()
+
+        # Exception (string)
+        if record.exc_info is not None:
+            event['Exception'] = self.formatException(record.exc_info)
+
+        # Properties: useful context + any LogRecord extras
+        props: dict = {
+            'Module': record.module,
+            'Function': record.funcName,
+            'Line': record.lineno,
+            'ProcessId': record.process,
+            'ThreadId': record.thread,
+            'ThreadName': record.threadName,
+        }
+
+        if record.stack_info is not None:
+            # Serilog often uses "StackTrace" in properties
+            props['StackTrace'] = self.formatStack(record.stack_info)
+
+        # Attach any extras passed via logger(..., extra={...})
+        for key, val in record.__dict__.items():
+            if key not in LOG_RECORD_BUILTIN_ATTRS:
+                props[key] = val
+
+        event['Properties'] = props
+        return event
 
 
 class NonErrorFilter(logging.Filter):
