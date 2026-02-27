@@ -6,7 +6,7 @@ import logging.config
 import pathlib
 from typing import override
 
-from app.core.config import LOG_LEVEL
+from app.core.config import APP_ENV, LOG_LEVEL, PROJECT_NAME, VERSION
 
 logger = logging.getLogger('anonify')
 logger.setLevel(LOG_LEVEL)
@@ -149,19 +149,20 @@ class MyJSONFormatter(logging.Formatter):
 
 class MySerilogFormatter(logging.Formatter):
     """
-    Serilog-compatible JSON formatter.
+    Serilog-compatible JSON formatter with optional Elastic Common Schema (ECS) version.
 
     Output shape (common Serilog JSON conventions):
-      - Timestamp (ISO-8601, UTC, with 'Z')
+      - Timestamp (ISO-8601, UTC, milliseconds, with 'Z')
       - Level (Verbose/Debug/Information/Warning/Error/Fatal)
       - MessageTemplate
       - RenderedMessage
       - Exception (optional)
       - SourceContext (logger name)
-      - Properties (custom/extra fields + useful context)
+      - Properties (custom/extra fields + useful context + default app metadata)
     """
 
     _LEVEL_MAP = {
+        'NOTSET': 'Verbose',
         'DEBUG': 'Debug',
         'INFO': 'Information',
         'WARNING': 'Warning',
@@ -174,33 +175,39 @@ class MySerilogFormatter(logging.Formatter):
         *,
         include_rendered_message: bool = True,
         include_message_template: bool = True,
+        include_ecs_version: str | None = '8.10.0',
     ):
         super().__init__()
         self.include_rendered_message = include_rendered_message
         self.include_message_template = include_message_template
+        self.include_ecs_version = include_ecs_version
 
     @override
     def format(self, record: logging.LogRecord) -> str:
         payload = self._prepare_serilog_dict(record)
-        return json.dumps(payload, default=str)
+        return json.dumps(payload, default=str, ensure_ascii=False)
 
     def _prepare_serilog_dict(self, record: logging.LogRecord) -> dict:
-        # Timestamp in UTC, Serilog-style (often ends with 'Z')
-        ts = dt.datetime.fromtimestamp(record.created, tz=dt.UTC).isoformat()
-        if ts.endswith('+00:00'):
-            ts = ts[:-6] + 'Z'
+        ts = (
+            dt.datetime.fromtimestamp(record.created, tz=dt.UTC)
+            .isoformat(timespec='milliseconds')
+            .replace('+00:00', 'Z')
+        )
 
         level = self._LEVEL_MAP.get(record.levelname, record.levelname.title())
+        if isinstance(level, str):
+            level = level.replace('\u001b[31m', '').replace('\u001b[39m', '')
 
-        # Build core event
         event: dict = {
             'Timestamp': ts,
             'Level': level,
             'SourceContext': record.name,
         }
 
+        if self.include_ecs_version:
+            event['ecs.version'] = self.include_ecs_version
+
         if self.include_message_template:
-            # record.msg is the unrendered template-ish message
             try:
                 event['MessageTemplate'] = (
                     record.msg
@@ -213,12 +220,11 @@ class MySerilogFormatter(logging.Formatter):
         if self.include_rendered_message:
             event['RenderedMessage'] = record.getMessage()
 
-        # Exception (string)
         if record.exc_info is not None:
             event['Exception'] = self.formatException(record.exc_info)
 
-        # Properties: useful context + any LogRecord extras
         props: dict = {
+            # Useful context
             'Module': record.module,
             'Function': record.funcName,
             'Line': record.lineno,
@@ -228,7 +234,6 @@ class MySerilogFormatter(logging.Formatter):
         }
 
         if record.stack_info is not None:
-            # Serilog often uses "StackTrace" in properties
             props['StackTrace'] = self.formatStack(record.stack_info)
 
         # Attach any extras passed via logger(..., extra={...})
@@ -237,6 +242,11 @@ class MySerilogFormatter(logging.Formatter):
                 props[key] = val
 
         event['Properties'] = props
+        event['service'] = {
+            'name': PROJECT_NAME,
+            'version': VERSION,
+        }
+        event['environment'] = APP_ENV
         return event
 
 

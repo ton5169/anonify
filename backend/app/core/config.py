@@ -10,6 +10,7 @@ config = Config(env_file_path)
 
 PROJECT_NAME = 'Anonify'
 VERSION = '1.0.0'
+APP_ENV = 'Development'
 API_PREFIX = '/api/v1'
 
 LOG_LEVEL = config('LOG_LEVEL', cast=str, default='INFO')
