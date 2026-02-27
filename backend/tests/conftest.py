@@ -16,20 +16,22 @@ def app() -> FastAPI:
 
 
 # Set up environment variables for testing
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope='session', autouse=True)
 def setup_test_env():
-    os.environ["AUTH_PASSWORD"] = "test_password"
-    os.environ["MAX_TEXT_LENGTH"] = "5000"
-    os.environ["HF_TOKEN"] = os.getenv("HF_TOKEN", "test_hf_token")
+    os.environ['AUTH_PASSWORD'] = 'test_password'
+    os.environ['MAX_TEXT_LENGTH'] = '5000'
+    os.environ['HF_TOKEN'] = os.getenv('HF_TOKEN', 'test_hf_token')
 
 
 # Fixture to create an AsyncClient for testing
 @pytest_asyncio.fixture
 async def client(app: FastAPI) -> AsyncClient:  # type: ignore
-    async with LifespanManager(app):
-        async with AsyncClient(
+    async with (
+        LifespanManager(app),
+        AsyncClient(
             transport=ASGITransport(app=app),
-            base_url="http://testserver",
-            headers={"Content-Type": "application/json"},
-        ) as client:
-            yield client  # type: ignore
+            base_url='http://testserver',
+            headers={'Content-Type': 'application/json'},
+        ) as client,
+    ):
+        yield client  # type: ignore

@@ -1,8 +1,12 @@
 import re
 from abc import ABC, abstractmethod
-from typing import List, Tuple
 
-from app.services.base import CleanedTextResult, PiiRule, RuleResult, TextAnonify
+from app.services.base import (
+    CleanedTextResult,
+    PiiRule,
+    RuleResult,
+    TextAnonify,
+)
 from app.services.utils import TextUtils
 
 
@@ -13,7 +17,9 @@ class BaseRegexRule(PiiRule, ABC):
     @abstractmethod
     def placeholder(self) -> str: ...
 
-    def _apply_rule_and_get_replaced_values(self, text: str, method: str) -> RuleResult:
+    def _apply_rule_and_get_replaced_values(
+        self, text: str, method: str
+    ) -> RuleResult:
         text, replaced_count, replaced_values = (
             TextUtils.return_placeholder_with_counter(
                 text,
@@ -24,74 +30,84 @@ class BaseRegexRule(PiiRule, ABC):
         )
         return RuleResult(text, replaced_values, replaced_count)
 
-    def apply(self, text: str, method: str = "regex") -> str:
+    def apply(self, text: str, method: str = 'regex') -> str:
         return self._apply_rule_and_get_replaced_values(text, method).text
 
-    def replaced_values(self, text: str, method: str = "regex") -> dict[str, str]:
-        return self._apply_rule_and_get_replaced_values(text, method).replaced_values
+    def replaced_values(
+        self, text: str, method: str = 'regex'
+    ) -> dict[str, str]:
+        return self._apply_rule_and_get_replaced_values(
+            text, method
+        ).replaced_values
 
-    def replaced_count(self, text: str, method: str = "regex") -> dict[str, int]:
-        return self._apply_rule_and_get_replaced_values(text, method).replaced_count
+    def replaced_count(
+        self, text: str, method: str = 'regex'
+    ) -> dict[str, int]:
+        return self._apply_rule_and_get_replaced_values(
+            text, method
+        ).replaced_count
 
 
 class RegexRuleEmail(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
-            r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b"
+            r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
         )
 
     @property
     def placeholder(self) -> str:
-        return "EMAIL"
+        return 'EMAIL'
 
 
 class RegexRuleIpv4(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
-            r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
-            r"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
+            r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
+            r'(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b'
         )
 
     @property
     def placeholder(self) -> str:
-        return "IP_ADDRESS"
+        return 'IP_ADDRESS'
 
 
 class RegexRuleIpv6(BaseRegexRule):
     def __init__(self):
         self._pattern = re.compile(
-            r"\b(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,7}:|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|"
-            r"(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|"
-            r"[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|"
-            r":(?:(?::[0-9a-fA-F]{1,4}){1,7}|:))\b",
+            r'\b(?:(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,7}:|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,5}(?::[0-9a-fA-F]{1,4}){1,2}|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,4}(?::[0-9a-fA-F]{1,4}){1,3}|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,3}(?::[0-9a-fA-F]{1,4}){1,4}|'
+            r'(?:[0-9a-fA-F]{1,4}:){1,2}(?::[0-9a-fA-F]{1,4}){1,5}|'
+            r'[0-9a-fA-F]{1,4}:(?:(?::[0-9a-fA-F]{1,4}){1,6})|'
+            r':(?:(?::[0-9a-fA-F]{1,4}){1,7}|:))\b',
             re.IGNORECASE,
         )
 
     @property
     def placeholder(self) -> str:
-        return "IP_ADDRESS"
+        return 'IP_ADDRESS'
 
 
 class RegexRuleUrl(BaseRegexRule):
     def __init__(self):
-        self._pattern = re.compile(r"\b(?:https?://|www\.)[^\s<>\"]+", re.IGNORECASE)
+        self._pattern = re.compile(
+            r'\b(?:https?://|www\.)[^\s<>\"]+', re.IGNORECASE
+        )
 
     @property
     def placeholder(self) -> str:
-        return "URL"
+        return 'URL'
 
 
 class RemovalServiceRegex(TextAnonify):
     def __init__(self, rules: list[PiiRule]):
         self._rules = rules
-        self._method = "regex"
+        self._method = 'regex'
 
-    def _apply_rules(self, text: str) -> Tuple[str, str]:
+    def _apply_rules(self, text: str) -> tuple[str, str]:
         cleaned_text = text
         for rule in self._rules:
             cleaned_text = rule.apply(cleaned_text, self._method)

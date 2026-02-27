@@ -16,13 +16,13 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-logger = logging.getLogger("anonify")
+logger = logging.getLogger('anonify')
 
 
 router = APIRouter()
 
 
-@router.post("/clean", name="pii:remover", status_code=HTTP_200_OK)
+@router.post('/clean', name='pii:remover', status_code=HTTP_200_OK)
 def remove_pii(
     input: PiiIn,
     clean_html: bool = False,
@@ -38,11 +38,13 @@ def remove_pii(
     try:
         cleaned_result = orchestrator.run_pipeline()
     except ValidationError as ve:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=ve.message)
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail=ve.message
+        ) from ve
     except ServiceError as se:
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=se.message
-        )
+        ) from se
 
     return PiiOut(
         original_text=input.original_text,

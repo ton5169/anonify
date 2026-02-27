@@ -64,7 +64,7 @@
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "json",
-      "filename": "backend/app/logs/app.log.jsonl",
+      "filename": "app/logs/app.log.jsonl",
       "maxBytes": 100000,
       "backupCount": 3,
       "filters": ["exclude_uvicorn_prefix"]
@@ -73,7 +73,7 @@
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "json",
-      "filename": "backend/app/logs/uvicorn.log.jsonl",
+      "filename": "app/logs/uvicorn.log.jsonl",
       "maxBytes": 100000,
       "backupCount": 3,
       "filters": ["include_uvicorn_only"]

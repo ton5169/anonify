@@ -13,11 +13,11 @@ def pii_model_service():
 
 class TestPiiModelService:
     @pytest.mark.parametrize(
-        "original_text, expected_result",
+        'original_text, expected_result',
         [
             (
-                "My email is test@gmail.com and my phone is 123-456-7890.",
-                "My email is [EMAIL_1] and my phone is [PHONENUMBER_1].",
+                'My email is test@gmail.com and my phone is 123-456-7890.',
+                'My email is [EMAIL_1] and my phone is [PHONENUMBER_1].',
             ),
         ],
     )
@@ -36,26 +36,27 @@ class TestPiiModelService:
             def run(text: str):
                 return [
                     {
-                        "start": text.index("test@gmail.com"),
-                        "end": text.index("test@gmail.com") + len("test@gmail.com"),
-                        "entity_group": "EMAIL",
-                        "score": 0.99,
-                        "word": "test@gmail.com",
+                        'start': text.index('test@gmail.com'),
+                        'end': text.index('test@gmail.com')
+                        + len('test@gmail.com'),
+                        'entity_group': 'EMAIL',
+                        'score': 0.99,
+                        'word': 'test@gmail.com',
                     },
                     {
-                        "start": text.index("123-456-7890"),
-                        "end": text.index("123-456-7890") + len("123-456-7890"),
-                        "entity_group": "PHONENUMBER",
-                        "score": 0.98,
-                        "word": "123-456-7890",
+                        'start': text.index('123-456-7890'),
+                        'end': text.index('123-456-7890') + len('123-456-7890'),
+                        'entity_group': 'PHONENUMBER',
+                        'score': 0.98,
+                        'word': '123-456-7890',
                     },
                 ]
 
             return run
 
-        monkeypatch.setattr(ms, "pipeline", fake_pipeline)
+        monkeypatch.setattr(ms, 'pipeline', fake_pipeline)
 
         result = pii_model_service.clean(original_text)
 
         assert result.cleaned_text == expected_result
-        assert result.method == "model"
+        assert result.method == 'model'

@@ -2,7 +2,11 @@ import pytest
 from app.models.pii import PiiOut
 from fastapi import FastAPI
 from httpx import AsyncClient
-from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+)
 
 pytestmark = pytest.mark.asyncio
 
@@ -10,11 +14,11 @@ pytestmark = pytest.mark.asyncio
 @pytest.fixture
 def pii_out():
     return PiiOut(
-        original_text="My name is John Doe and my email is fakemail@mail.com.",
-        cleaned_text="My name is John Doe and my email is [EMAIL_1].",
-        methods=["regex", "model"],
-        replaced_values={"regex:EMAIL_1": "fakemail@mail.com"},
-        replaced_count={"regex:EMAIL": 1},
+        original_text='My name is John Doe and my email is fakemail@mail.com.',
+        cleaned_text='My name is John Doe and my email is [EMAIL_1].',
+        methods=['regex', 'model'],
+        replaced_values={'regex:EMAIL_1': 'fakemail@mail.com'},
+        replaced_count={'regex:EMAIL': 1},
     )
 
 
@@ -30,7 +34,7 @@ def mock_model_pipeline(monkeypatch):
 
         return run
 
-    monkeypatch.setattr(ms, "pipeline", fake_pipeline)
+    monkeypatch.setattr(ms, 'pipeline', fake_pipeline)
 
 
 class TestPiiRemoverRoutes:
@@ -38,9 +42,9 @@ class TestPiiRemoverRoutes:
         self, app: FastAPI, client: AsyncClient
     ) -> None:
         res = await client.post(
-            app.url_path_for("pii:remover"),
+            app.url_path_for('pii:remover'),
             json={
-                "original_text": "My name is John Doe and my email is fakemail@mail.com."
+                'original_text': 'My name is John Doe and my email is fakemail@mail.com.'
             },
         )
         assert res.status_code != HTTP_404_NOT_FOUND
@@ -49,8 +53,8 @@ class TestPiiRemoverRoutes:
         self, app: FastAPI, client: AsyncClient, pii_out: PiiOut
     ) -> None:
         res = await client.post(
-            app.url_path_for("pii:remover"),
-            json={"original_text": pii_out.original_text},
+            app.url_path_for('pii:remover'),
+            json={'original_text': pii_out.original_text},
         )
         assert res.status_code == HTTP_200_OK
 
@@ -61,26 +65,31 @@ class TestPiiRemoverRoutes:
         self, app: FastAPI, client: AsyncClient
     ) -> None:
         res = await client.post(
-            app.url_path_for("pii:remover"), json={"original_text": "    "}
+            app.url_path_for('pii:remover'), json={'original_text': '    '}
         )
         assert res.status_code == HTTP_400_BAD_REQUEST
 
     @pytest.mark.parametrize(
-        "invalid_payload, status_code",
+        'invalid_payload, status_code',
         (
             (None, 422),
             ({}, 422),
             (12345, 422),
-            ("", 422),
+            ('', 422),
             ([], 422),
-            ("a" * 50001, 422),
-            ({"name": "John"}, 422),
+            ('a' * 50001, 422),
+            ({'name': 'John'}, 422),
         ),
     )
     async def test_pii_remover_invalid_input_raises_error(
-        self, app: FastAPI, client: AsyncClient, invalid_payload: dict, status_code: int
+        self,
+        app: FastAPI,
+        client: AsyncClient,
+        invalid_payload: dict,
+        status_code: int,
     ) -> None:
         res = await client.post(
-            app.url_path_for("pii:remover"), json={"original_text": invalid_payload}
+            app.url_path_for('pii:remover'),
+            json={'original_text': invalid_payload},
         )
         assert res.status_code == status_code

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Protocol, Tuple
+from typing import Protocol
 
 
 @dataclass
@@ -7,8 +7,9 @@ class RuleResult:
     """Class to hold the result of applying a PII rule."""
 
     text: str
-    replaced_values: Dict[str, str]
-    replaced_count: Dict[str, int]
+    replaced_values: dict[str, str]
+    replaced_count: dict[str, int]
+
 
 @dataclass
 class CleanedTextResult:
@@ -16,8 +17,8 @@ class CleanedTextResult:
 
     method: str
     cleaned_text: str
-    replaced_values: Dict[str, str]
-    replaced_count: Dict[str, int]
+    replaced_values: dict[str, str]
+    replaced_count: dict[str, int]
 
 
 class HtmlService(Protocol):
@@ -35,7 +36,7 @@ class HtmlService(Protocol):
 class ValidationService(Protocol):
     """Protocol for validation service."""
 
-    def validate(self, text: str) -> Tuple[bool, str]:
+    def validate(self, text: str) -> tuple[bool, str]:
         """Validates the input text and returns a tuple of (is_valid, message)."""
         ...
 
@@ -59,11 +60,11 @@ class TextAnonify(Protocol):
         """Cleans the input text and returns the cleaned text along with the method used."""
         ...
 
-    def replaced_values(self, text: str) -> Dict[str, str]:
+    def replaced_values(self, text: str) -> dict[str, str]:
         """Returns a dictionary of replaced values in the cleaned text."""
         ...
 
-    def replaced_count(self, text: str) -> Dict[str, int]:
+    def replaced_count(self, text: str) -> dict[str, int]:
         """Returns a dictionary of counts of replaced values in the cleaned text."""
         ...
 

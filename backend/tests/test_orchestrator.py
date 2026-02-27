@@ -36,7 +36,7 @@ class TestOrchestrator:
     def test_orchestrator_success(
         self, regex_service, validation_service, html_service
     ) -> None:
-        text = "My email is test@mail.com and my IP is 192.168.1.1"
+        text = 'My email is test@mail.com and my IP is 192.168.1.1'
 
         orch = Orchestrator(
             input=PiiIn(original_text=text),
@@ -49,23 +49,23 @@ class TestOrchestrator:
         result = orch.run_pipeline()
 
         assert result.cleaned_text == (
-            "My email is [EMAIL_1] and my IP is [IP_ADDRESS_1]"
+            'My email is [EMAIL_1] and my IP is [IP_ADDRESS_1]'
         )
-        assert result.methods == ["regex"]
+        assert result.methods == ['regex']
         assert result.replaced_values == {
-            "regex:EMAIL_1": "test@mail.com",
-            "regex:IP_ADDRESS_1": "192.168.1.1",
+            'regex:EMAIL_1': 'test@mail.com',
+            'regex:IP_ADDRESS_1': '192.168.1.1',
         }
         assert result.replaced_count == {
-            "regex:EMAIL": 1,
-            "regex:IP_ADDRESS": 1,
+            'regex:EMAIL': 1,
+            'regex:IP_ADDRESS': 1,
         }
 
     def test_orchestrator_validation_error(
         self, regex_service, validation_service, html_service
     ) -> None:
         orch = Orchestrator(
-            input=PiiIn(original_text="  "),
+            input=PiiIn(original_text='  '),
             clean_services=[regex_service],
             validation_services=[validation_service],
             html_service=html_service,
@@ -79,34 +79,36 @@ class TestOrchestrator:
         self, regex_service, html_service
     ) -> None:
         orch = Orchestrator(
-            input=PiiIn(original_text="test@mail.com"),
+            input=PiiIn(original_text='test@mail.com'),
             clean_services=[regex_service],
             validation_services=[],
             html_service=html_service,
             clean_html=False,
         )
 
-        with pytest.raises(ServiceError, match="No validation services configured"):
+        with pytest.raises(
+            ServiceError, match='No validation services configured'
+        ):
             orch.run_pipeline()
 
     def test_orchestrator_no_clean_services(
         self, validation_service, html_service
     ) -> None:
         orch = Orchestrator(
-            input=PiiIn(original_text="test@mail.com"),
+            input=PiiIn(original_text='test@mail.com'),
             clean_services=[],
             validation_services=[validation_service],
             html_service=html_service,
             clean_html=False,
         )
 
-        with pytest.raises(ServiceError, match="No clean services configured"):
+        with pytest.raises(ServiceError, match='No clean services configured'):
             orch.run_pipeline()
 
     def test_orchestrator_clean_html_applied(
         self, regex_service, validation_service, html_service
     ) -> None:
-        html_text = "<p>My email is test@mail.com</p>"
+        html_text = '<p>My email is test@mail.com</p>'
 
         orch = Orchestrator(
             input=PiiIn(original_text=html_text),
@@ -118,21 +120,26 @@ class TestOrchestrator:
 
         result = orch.run_pipeline()
 
-        assert "[EMAIL_1]" in result.cleaned_text
-        assert "<p>" not in result.cleaned_text
-        assert result.methods == ["regex"]
+        assert '[EMAIL_1]' in result.cleaned_text
+        assert '<p>' not in result.cleaned_text
+        assert result.methods == ['regex']
 
     @pytest.mark.parametrize(
-        "text, expected_count",
+        'text, expected_count',
         [
             (
-                "Emails: a@mail.com and b@mail.com",
-                {"regex:EMAIL": 2},
+                'Emails: a@mail.com and b@mail.com',
+                {'regex:EMAIL': 2},
             ),
         ],
     )
     def test_orchestrator_replaced_count_multiple(
-        self, regex_service, validation_service, html_service, text, expected_count
+        self,
+        regex_service,
+        validation_service,
+        html_service,
+        text,
+        expected_count,
     ) -> None:
         orch = Orchestrator(
             input=PiiIn(original_text=text),

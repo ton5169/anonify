@@ -4,5 +4,5 @@ from fastapi import APIRouter
 
 router = APIRouter()
 
-router.include_router(ping_router, prefix="/ping", tags=["ping"])
-router.include_router(pii_remover_router, prefix="/pii", tags=["pii"])
+router.include_router(ping_router, prefix='/ping', tags=['ping'])
+router.include_router(pii_remover_router, prefix='/pii', tags=['pii'])
